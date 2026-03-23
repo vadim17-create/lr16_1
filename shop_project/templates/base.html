@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}SALMO Shop{% endblock %}</title>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --primary: #0d6efd;
+            --primary-dark: #0a58ca;
+            --success: #198754;
+            --danger: #dc3545;
+            --bg: #f4f6f9;
+            --card-bg: #ffffff;
+            --text: #212529;
+            --muted: #6c757d;
+            --border: #dee2e6;
+            --radius: 10px;
+            --shadow: 0 2px 12px rgba(0,0,0,.08);
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* NAV */
+        nav {
+            background: linear-gradient(135deg, #0d6efd 0%, #0a3d8f 100%);
+            padding: 0 2rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,.2);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .nav-inner {
+            max-width: 1200px;
+            margin: auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 60px;
+        }
+        .nav-brand {
+            color: #fff;
+            font-size: 1.4rem;
+            font-weight: 700;
+            text-decoration: none;
+            letter-spacing: .5px;
+        }
+        .nav-brand span { color: #7dd3fc; }
+        .nav-links { display: flex; gap: .5rem; align-items: center; }
+        .nav-links a {
+            color: rgba(255,255,255,.85);
+            text-decoration: none;
+            padding: .4rem .9rem;
+            border-radius: 6px;
+            font-size: .9rem;
+            transition: background .2s, color .2s;
+        }
+        .nav-links a:hover { background: rgba(255,255,255,.15); color: #fff; }
+        .nav-cart {
+            background: rgba(255,255,255,.15);
+            color: #fff !important;
+            border: 1px solid rgba(255,255,255,.3);
+            font-weight: 600;
+        }
+        .nav-cart:hover { background: rgba(255,255,255,.28) !important; }
+
+        /* MAIN */
+        main {
+            flex: 1;
+            max-width: 1200px;
+            width: 100%;
+            margin: 2rem auto;
+            padding: 0 1.5rem;
+        }
+
+        /* FOOTER */
+        footer {
+            background: #1a1a2e;
+            color: rgba(255,255,255,.5);
+            text-align: center;
+            padding: 1.2rem;
+            font-size: .85rem;
+            margin-top: auto;
+        }
+
+        /* CARDS */
+        .card {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 1.5rem;
+        }
+
+        /* BUTTONS */
+        .btn {
+            display: inline-block;
+            padding: .5rem 1.2rem;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            font-size: .9rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: transform .1s, box-shadow .2s, filter .2s;
+        }
+        .btn:hover { filter: brightness(1.1); transform: translateY(-1px); }
+        .btn:active { transform: translateY(0); }
+        .btn-primary { background: var(--primary); color: #fff; }
+        .btn-success { background: var(--success); color: #fff; }
+        .btn-danger  { background: var(--danger);  color: #fff; }
+        .btn-outline {
+            background: transparent;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+        }
+        .btn-outline:hover { background: var(--primary); color: #fff; }
+        .btn-lg { padding: .75rem 2rem; font-size: 1rem; }
+        .btn-sm { padding: .3rem .7rem; font-size: .8rem; }
+
+        /* ALERTS */
+        .alert {
+            padding: .8rem 1.2rem;
+            border-radius: 6px;
+            margin-bottom: 1rem;
+            font-size: .9rem;
+        }
+        .alert-danger  { background: #f8d7da; color: #842029; border: 1px solid #f5c2c7; }
+        .alert-success { background: #d1e7dd; color: #0f5132; border: 1px solid #badbcc; }
+
+        /* FORM */
+        .form-group { margin-bottom: 1.2rem; }
+        .form-group label { display: block; font-weight: 600; margin-bottom: .4rem; font-size: .9rem; }
+        .form-control {
+            width: 100%;
+            padding: .6rem .9rem;
+            border: 1.5px solid var(--border);
+            border-radius: 6px;
+            font-size: .95rem;
+            transition: border-color .2s, box-shadow .2s;
+            background: #fff;
+        }
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(13,110,253,.15);
+        }
+
+        /* PAGE TITLE */
+        .page-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            color: var(--text);
+        }
+        .breadcrumb {
+            font-size: .85rem;
+            color: var(--muted);
+            margin-bottom: 1rem;
+        }
+        .breadcrumb a { color: var(--primary); text-decoration: none; }
+        .breadcrumb a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+<nav>
+    <div class="nav-inner">
+        <a class="nav-brand" href="/">🎣 SALMO<span>Shop</span></a>
+        <div class="nav-links">
+            <a href="/">Главная</a>
+            <a href="/about/">О магазине</a>
+            <a href="/catalog/">Каталог</a>
+            <a href="/author/">Об авторе</a>
+            <a href="/cart/" class="nav-cart">🛒 Корзина{% if cart_count %} ({{ cart_count }}){% endif %}</a>
+        </div>
+    </div>
+</nav>
+
+<main>
+    {% block content %}{% endblock %}
+</main>
+
+<footer>
+    © 2026 SALMO Shop — рыболовные товары
+</footer>
+</body>
+</html>

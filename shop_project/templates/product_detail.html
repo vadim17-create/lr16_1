@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}{{ product.name }} — SALMO Shop{% endblock %}
+{% block content %}
+
+<div class="breadcrumb">
+    <a href="/">Главная</a> / <a href="/catalog/">Каталог</a> / {{ product.name }}
+</div>
+
+<div class="card" style="display:grid; grid-template-columns:1fr 1fr; gap:2.5rem; align-items:start;">
+    <!-- Левая колонка: фото-заглушка -->
+    <div style="background:linear-gradient(135deg,#e0f0ff,#c7e0ff); border-radius:var(--radius);
+                aspect-ratio:1; display:flex; align-items:center; justify-content:center; font-size:6rem;">
+        🎣
+    </div>
+
+    <!-- Правая колонка: инфо -->
+    <div>
+        <div style="font-size:.8rem; color:#6c757d; background:#f0f4ff; padding:.3rem .8rem;
+                    border-radius:20px; width:fit-content; margin-bottom:.8rem;">
+            {{ product.category.name }}
+        </div>
+        <h1 style="font-size:1.8rem; font-weight:800; margin-bottom:.5rem;">{{ product.name }}</h1>
+        <p style="color:#6c757d; font-size:.9rem; margin-bottom:1rem;">🏭 {{ product.manufacturer.name }} · {{ product.manufacturer.country }}</p>
+
+        <p style="font-size:2.2rem; font-weight:800; color:#198754; margin-bottom:1rem;">{{ product.price }} руб.</p>
+
+        <p style="font-size:.95rem; line-height:1.6; color:#444; margin-bottom:1.2rem;">{{ product.description }}</p>
+
+        <p style="font-size:.9rem; margin-bottom:1.5rem;
+                  color:{% if product.stock_quantity > 0 %}#198754{% else %}#dc3545{% endif %}; font-weight:600;">
+            📦 {% if product.stock_quantity > 0 %}В наличии: {{ product.stock_quantity }} шт.{% else %}Нет в наличии{% endif %}
+        </p>
+
+        {% if product.stock_quantity > 0 %}
+        <form method="post" action="/cart/add/{{ product.pk }}/" style="display:flex; gap:.7rem; align-items:center;">
+            <input type="number" name="quantity" value="1" min="1" max="{{ product.stock_quantity }}"
+                   class="form-control" style="width:80px;">
+            <button type="submit" class="btn btn-success btn-lg">🛒 Добавить в корзину</button>
+        </form>
+        {% else %}
+        <button class="btn btn-lg" style="background:#adb5bd;color:#fff;cursor:not-allowed;" disabled>Нет в наличии</button>
+        {% endif %}
+    </div>
+</div>
+
+{% endblock %}
