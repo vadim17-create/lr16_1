@@ -1,4 +1,7 @@
 from django.http import HttpResponse
+from django.shortcuts import render, get_object_or_404
+from .models import Product, Category
+
 
 def home(request):
     return HttpResponse(
@@ -8,10 +11,10 @@ def home(request):
         <ul>
             <li><a href='/about/'>О магазине</a></li>
             <li><a href='/author/'>Об авторе</a></li>
+            <li><b><a href='/catalog/'>Каталог товаров </a></b></li>
         </ul>
         """
     )
-
 def about(request):
     return HttpResponse(
         """
@@ -307,3 +310,127 @@ def author(request):
         <p><a href='/'>На главную</a></p>
         """
     )
+
+
+def product_list(request):
+    products = Product.objects.all()
+    categories = Category.objects.all()
+
+    # 1. Поиск по названию
+    search_query = request.GET.get('search', '').strip()
+    if search_query:
+        products = products.filter(name__icontains=search_query)
+
+    # 2. Фильтрация по категории
+    category_id = request.GET.get('category', '')
+    if category_id:
+        products = products.filter(category_id=category_id)
+
+    # 3. Сортировка по цене
+    sort_by = request.GET.get('sort', '')
+    if sort_by == 'cheap':
+        products = products.order_by('price')
+    elif sort_by == 'expensive':
+        products = products.order_by('-price')
+
+    # Строим HTML для списка категорий
+    category_options = '<option value="">Все категории</option>'
+    for cat in categories:
+        category_options += f'<option value="{cat.id}">{cat.name}</option>'
+
+    # Строим HTML для карточек товаров
+    products_html = ''
+    for product in products:
+        products_html += f"""
+        <div style="border: 1px solid #ccc; padding: 15px; width: 220px; border-radius: 5px;">
+            <h4 style="margin: 0 0 10px 0;">{product.name}</h4>
+            <p>📂 {product.category.name}</p>
+            <p>🏭 {product.manufacturer.name}</p>
+            <p style="color: green; font-weight: bold; font-size: 18px;">{product.price} руб.</p>
+            <p>📦 Остаток: {product.stock_quantity} шт.</p>
+            <a href="/catalog/{product.pk}/">Подробнее →</a>
+        </div>
+        """
+
+    if not products_html:
+        products_html = '<p>❌ Товары по вашему запросу не найдены.</p>'
+
+    total = products.count()
+
+    html = f"""
+    <!DOCTYPE html>
+    <html lang="ru">
+    <head>
+        <meta charset="UTF-8">
+        <title>Каталог товаров</title>
+    </head>
+    <body style="font-family: Arial, sans-serif; padding: 20px;">
+
+        <h1>Каталог товаров</h1>
+        <p><a href="/">← На главную</a></p>
+
+        <div style="background-color: #f0f0f0; padding: 15px; margin-bottom: 20px; border-radius: 5px;">
+            <h3>Поиск и фильтрация:</h3>
+            <form method="get" action="/catalog/">
+                <label>🔍 Поиск по названию:</label>
+                <input type="text" name="search" value="{search_query}" placeholder="Введите название...">
+
+                <label>📂 Категория:</label>
+                <select name="category">
+                    {category_options}
+                </select>
+
+                <label>↕️ Сортировка:</label>
+                <select name="sort">
+                    <option value="">Без сортировки</option>
+                    <option value="cheap">Сначала дешевые</option>
+                    <option value="expensive">Сначала дорогие</option>
+                </select>
+
+                <button type="submit">Применить</button>
+                <a href="/catalog/"><button type="button">Сбросить</button></a>
+            </form>
+        </div>
+
+        <h3>Найдено товаров: {total}</h3>
+        <div style="display: flex; flex-wrap: wrap; gap: 20px;">
+            {products_html}
+        </div>
+
+    </body>
+    </html>
+    """
+    return HttpResponse(html)
+
+
+def product_detail(request, pk):
+    try:
+        product = Product.objects.get(pk=pk)
+    except Product.DoesNotExist:
+        return HttpResponse("<h1>Товар не найден</h1><a href='/catalog/'>Назад</a>")
+
+    html = f"""
+    <!DOCTYPE html>
+    <html lang="ru">
+    <head>
+        <meta charset="UTF-8">
+        <title>{product.name}</title>
+    </head>
+    <body style="font-family: Arial, sans-serif; padding: 20px;">
+
+        <p><a href="/catalog/">← Назад к списку товаров</a></p>
+
+        <h1>{product.name}</h1>
+
+        <div style="margin-top: 20px;">
+            <p>📂 <b>Категория:</b> {product.category.name}</p>
+            <p>🏭 <b>Производитель:</b> {product.manufacturer.name} ({product.manufacturer.country})</p>
+            <p>📝 <b>Описание:</b> {product.description}</p>
+            <p style="color: green; font-weight: bold; font-size: 28px;">💰 {product.price} руб.</p>
+            <p>📦 <b>Наличие на складе:</b> {product.stock_quantity} шт.</p>
+        </div>
+
+    </body>
+    </html>
+    """
+    return HttpResponse(html)
