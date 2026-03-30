@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}О магазине — SALMO Shop{% endblock %}
+{% block content %}
+
+<h1 class="page-title">О магазине</h1>
+
+<div class="card" style="margin-bottom:1.5rem;">
+    <p style="font-size:1rem; line-height:1.7; color:#444;">
+        Магазин <b>SALMO Shop</b> специализируется на рыболовных товарах от бренда
+        <a href="https://www.salmo.by/" target="_blank" style="color:#0d6efd;">SALMO</a>.
+        Мы предлагаем широкий ассортимент снастей, аксессуаров и оборудования для рыбалки.
+    </p>
+</div>
+
+<h2 style="font-size:1.3rem; font-weight:700; margin-bottom:1rem;">Популярные товары</h2>
+<div style="overflow-x:auto;">
+<table style="width:100%; border-collapse:collapse; background:#fff; border-radius:var(--radius); overflow:hidden; box-shadow:var(--shadow);">
+    <thead>
+        <tr style="background:linear-gradient(135deg,#0d6efd,#0a3d8f); color:#fff;">
+            <th style="padding:.8rem 1rem; text-align:left;">Товар</th>
+            <th style="padding:.8rem 1rem; text-align:left;">Описание</th>
+            <th style="padding:.8rem 1rem; text-align:right;">Цена</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for row in table_rows %}
+        <tr style="border-bottom:1px solid #f0f0f0; {% if forloop.counter|divisibleby:2 %}background:#f8f9fa;{% endif %}">
+            <td style="padding:.7rem 1rem; font-weight:600;">{{ row.0 }}</td>
+            <td style="padding:.7rem 1rem; color:#6c757d;">{{ row.1 }}</td>
+            <td style="padding:.7rem 1rem; text-align:right; color:#198754; font-weight:700;">{{ row.2 }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+</div>
+
+{% endblock %}

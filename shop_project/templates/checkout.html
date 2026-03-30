@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% block title %}Оформление заказа — SALMO Shop{% endblock %}
+{% block content %}
+
+<h1 class="page-title">💳 Оформление заказа</h1>
+
+<div style="display:grid; grid-template-columns:1fr 360px; gap:1.5rem; align-items:start;">
+
+    <!-- Форма -->
+    <div class="card">
+        {% if error %}
+        <div class="alert alert-danger">{{ error }}</div>
+        {% endif %}
+
+        <form method="post">
+            {% csrf_token %}
+            <h3 style="margin-bottom:1.2rem; font-size:1.1rem; border-bottom:1px solid #dee2e6; padding-bottom:.8rem;">
+                📦 Данные доставки
+            </h3>
+            <div class="form-group">
+                <label>Имя и фамилия</label>
+                <input class="form-control" type="text" name="name" placeholder="Иван Иванов" value="{{ form_data.name }}" required>
+            </div>
+            <div class="form-group">
+                <label>Телефон</label>
+                <input class="form-control" type="tel" name="phone" placeholder="+375 XX XXX-XX-XX" value="{{ form_data.phone }}" required>
+            </div>
+            <div class="form-group">
+                <label>Email для получения чека</label>
+                <input class="form-control" type="email" name="email" placeholder="example@mail.com" value="{{ form_data.email }}" required>
+            </div>
+            <div class="form-group">
+                <label>Адрес доставки</label>
+                <input class="form-control" type="text" name="address" placeholder="г. Минск, ул. Примерная, д. 1" value="{{ form_data.address }}" required>
+            </div>
+
+            <h3 style="margin:1.5rem 0 1rem; font-size:1.1rem; border-bottom:1px solid #dee2e6; padding-bottom:.8rem;">
+                💳 Способ оплаты
+            </h3>
+            <div style="display:flex; flex-direction:column; gap:.7rem; margin-bottom:1.5rem;">
+                <label style="display:flex; align-items:center; gap:.8rem; padding:.8rem 1rem;
+                              border:1.5px solid #dee2e6; border-radius:8px; cursor:pointer;
+                              transition:border-color .2s;"
+                       onclick="this.style.borderColor='#0d6efd'">
+                    <input type="radio" name="payment" value="card" checked style="accent-color:#0d6efd;">
+                    <span>💳 Банковская карта</span>
+                </label>
+                <label style="display:flex; align-items:center; gap:.8rem; padding:.8rem 1rem;
+                              border:1.5px solid #dee2e6; border-radius:8px; cursor:pointer;">
+                    <input type="radio" name="payment" value="cash" style="accent-color:#0d6efd;">
+                    <span>💵 Наличными при получении</span>
+                </label>
+                <label style="display:flex; align-items:center; gap:.8rem; padding:.8rem 1rem;
+                              border:1.5px solid #dee2e6; border-radius:8px; cursor:pointer;">
+                    <input type="radio" name="payment" value="online" style="accent-color:#0d6efd;">
+                    <span>📱 Онлайн-оплата (ЕРИП)</span>
+                </label>
+            </div>
+
+            <button type="submit" class="btn btn-success btn-lg" style="width:100%;">
+                ✅ Подтвердить заказ на {{ total }} руб.
+            </button>
+        </form>
+    </div>
+
+    <!-- Сводка заказа -->
+    <div class="card" style="position:sticky; top:80px;">
+        <h3 style="margin-bottom:1rem; font-size:1.1rem;">Ваш заказ</h3>
+        {% for item in items %}
+        <div style="display:flex; justify-content:space-between; align-items:center;
+                    padding:.6rem 0; border-bottom:1px solid #f0f0f0; font-size:.9rem;">
+            <div>
+                <div style="font-weight:600;">{{ item.product.name }}</div>
+                <div style="color:#6c757d; font-size:.8rem;">{{ item.quantity }} шт. × {{ item.product.price }} руб.</div>
+            </div>
+            <span style="font-weight:700;">{{ item.item_cost }} руб.</span>
+        </div>
+        {% endfor %}
+        <div style="display:flex; justify-content:space-between; font-size:1.15rem;
+                    font-weight:800; margin-top:1rem; padding-top:.8rem; border-top:2px solid #dee2e6;">
+            <span>Итого:</span>
+            <span style="color:#198754;">{{ total }} руб.</span>
+        </div>
+        <a href="/cart/" style="display:block; text-align:center; margin-top:1rem;
+                                font-size:.85rem; color:#6c757d; text-decoration:none;">← Назад в корзину</a>
+    </div>
+
+</div>
+
+{% endblock %}

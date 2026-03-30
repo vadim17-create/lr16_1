@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+
+{% block title %}Регистрация{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width: 420px; margin: 2rem auto;">
+    <h1 class="page-title" style="text-align: center;">Регистрация</h1>
+    
+    {% if form.errors %}
+    <div class="alert alert-danger">
+        ⚠️ Исправьте ошибки в форме.
+    </div>
+    {% endif %}
+    
+    <form method="post">
+        {% csrf_token %}
+        
+        <div class="form-group">
+            <label for="id_username">Имя пользователя</label>
+            {{ form.username }}
+            {% if form.username.errors %}
+            <small style="color: var(--danger);">{{ form.username.errors.0 }}</small>
+            {% endif %}
+        </div>
+        
+        <div class="form-group">
+            <label for="id_email">Email</label>
+            {{ form.email }}
+            {% if form.email.errors %}
+            <small style="color: var(--danger);">{{ form.email.errors.0 }}</small>
+            {% endif %}
+        </div>
+        
+        <div class="form-group">
+            <label for="id_password1">Пароль</label>
+            {{ form.password1 }}
+            {% if form.password1.errors %}
+            <small style="color: var(--danger);">{{ form.password1.errors.0 }}</small>
+            {% endif %}
+        </div>
+        
+        <div class="form-group">
+            <label for="id_password2">Подтверждение пароля</label>
+            {{ form.password2 }}
+            {% if form.password2.errors %}
+            <small style="color: var(--danger);">{{ form.password2.errors.0 }}</small>
+            {% endif %}
+        </div>
+        
+        <button type="submit" class="btn btn-primary btn-lg" style="width: 100%;">Зарегистрироваться</button>
+    </form>
+    
+    <p style="text-align: center; margin-top: 1.5rem; color: var(--muted);">
+        Уже есть аккаунт? <a href="/login/" style="color: var(--primary);">Войти</a>
+    </p>
+</div>
+{% endblock %}
