@@ -9,10 +9,12 @@ router.register(r'categories', views.CategoryViewSet)
 router.register(r'manufacturers', views.ManufacturerViewSet)
 router.register(r'carts', views.CartViewSet)
 router.register(r'cart-items', views.CartItemViewSet)
+router.register(r'orders', views.OrderViewSet, basename='orders')
 
 urlpatterns = [
     # API
     path('api/', include(router.urls)),
+    path('api/me/', views.me_view, name='api-me'),
     path('api/auth/', include('rest_framework.urls', namespace='rest_framework')),
 
     #  старые маршруты
@@ -37,4 +39,9 @@ urlpatterns = [
 
     # Регистрация
     path('register/', views.register, name='register'),
+
+    # Личный кабинет
+    path('profile/', views.profile_view, name='profile'),
+    path('profile/order/<int:pk>/', views.order_detail_view, name='order_detail'),
+    path('settings/', views.settings_view, name='settings'),
 ]

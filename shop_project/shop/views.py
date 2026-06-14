@@ -3,19 +3,24 @@ from django.db.models import Q, Sum
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login
+from django.contrib.auth.forms import PasswordChangeForm
+from django.contrib.auth import update_session_auth_hash
 from django.core.mail import EmailMessage
 from django.core.paginator import Paginator
 from django.conf import settings
 from decimal import Decimal
 import io
-from .models import Product, Category, Cart, CartItem, Order, OrderItem, Manufacturer
+from .models import Product, Category, Cart, CartItem, Order, OrderItem, Manufacturer, Profile
 from .forms import RegisterForm
 
 # --- DRF imports ---
-from rest_framework import viewsets, permissions
+from rest_framework import viewsets, permissions, status, generics
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.response import Response
 from .serializers import (
     ProductSerializer, CategorySerializer, ManufacturerSerializer,
-    CartSerializer, CartItemSerializer,
+    CartSerializer, CartItemSerializer, ProfileSerializer,
+    OrderSerializer,
 )
 
 # Проверка наличия openpyxl для Excel
@@ -379,8 +384,9 @@ def register(request):
         form = RegisterForm(request.POST)
         if form.is_valid():
             user = form.save()
-            # Создаём пустую корзину для нового пользователя
-            Cart.objects.create(user=user)
+            # Профиль создаётся автоматически через signal
+            # Создаём пустую корзину
+            Cart.objects.get_or_create(user=user)
             login(request, user)
             return redirect('/')
         else:
@@ -392,22 +398,32 @@ def register(request):
 
 # ─── DRF API ViewSets ────────────────────────────────────────────────────────
 
+class IsAdminOrReadOnly(permissions.BasePermission):
+    """GET доступен всем, POST/PUT/PATCH/DELETE — только администраторам"""
+    def has_permission(self, request, view):
+        if request.method in permissions.SAFE_METHODS:
+            return True
+        if not request.user.is_authenticated:
+            return False
+        return hasattr(request.user, 'profile') and request.user.profile.is_admin
+
+
 class ProductViewSet(viewsets.ModelViewSet):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [IsAdminOrReadOnly]
 
 
 class CategoryViewSet(viewsets.ModelViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [IsAdminOrReadOnly]
 
 
 class ManufacturerViewSet(viewsets.ModelViewSet):
     queryset = Manufacturer.objects.all()
     serializer_class = ManufacturerSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [IsAdminOrReadOnly]
 
 
 class CartViewSet(viewsets.ModelViewSet):
@@ -420,3 +436,101 @@ class CartItemViewSet(viewsets.ModelViewSet):
     queryset = CartItem.objects.all()
     serializer_class = CartItemSerializer
     permission_classes = [permissions.IsAuthenticated]
+
+
+class OrderViewSet(viewsets.ModelViewSet):
+    serializer_class = OrderSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        """Покупатель видит только свои заказы, админ — все"""
+        user = self.request.user
+        if hasattr(user, 'profile') and user.profile.is_admin:
+            return Order.objects.all()
+        return Order.objects.filter(user=user)
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
+
+# ─── /api/me/ endpoint ──────────────────────────────────────────────────────
+
+@api_view(['GET', 'PATCH'])
+@permission_classes([permissions.IsAuthenticated])
+def me_view(request):
+    """GET /api/me/ — профиль текущего пользователя"""
+    """PATCH /api/me/ — изменение профиля"""
+    profile, _ = Profile.objects.get_or_create(user=request.user)
+
+    if request.method == 'GET':
+        serializer = ProfileSerializer(profile)
+        return Response(serializer.data)
+
+    elif request.method == 'PATCH':
+        serializer = ProfileSerializer(profile, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+# ─── ЛИЧНЫЙ КАБИНЕТ ───────────────────────────────────────────────────────
+
+@login_required
+def profile_view(request):
+    """Страница личного кабинета"""
+    profile, _ = Profile.objects.get_or_create(user=request.user)
+    orders = Order.objects.filter(user=request.user).order_by('-created_at')
+    categories = Category.objects.all()
+
+    if request.method == 'POST':
+        profile.full_name = request.POST.get('full_name', '').strip()
+        profile.phone = request.POST.get('phone', '').strip()
+        profile.address = request.POST.get('address', '').strip()
+        profile.city = request.POST.get('city', '').strip()
+        profile.postal_code = request.POST.get('postal_code', '').strip()
+        fav_cat = request.POST.get('favorite_category', '')
+        if fav_cat:
+            profile.favorite_category_id = fav_cat
+        else:
+            profile.favorite_category = None
+        profile.save()
+        return redirect('/profile/')
+
+    return render(request, 'profile.html', {
+        'profile': profile,
+        'orders': orders,
+        'categories': categories,
+        'cart_count': _cart_count(request),
+    })
+
+
+@login_required
+def order_detail_view(request, pk):
+    """Детали заказа"""
+    order = get_object_or_404(Order, pk=pk)
+    # Покупатель может смотреть только свои заказы, админ — все
+    if not (hasattr(request.user, 'profile') and request.user.profile.is_admin):
+        if order.user != request.user:
+            return redirect('/profile/')
+    return render(request, 'order_detail.html', {
+        'order': order,
+        'cart_count': _cart_count(request),
+    })
+
+
+@login_required
+def settings_view(request):
+    """Страница настроек — смена пароля"""
+    if request.method == 'POST':
+        form = PasswordChangeForm(request.user, request.POST)
+        if form.is_valid():
+            user = form.save()
+            update_session_auth_hash(request, user)
+            return redirect('/profile/')
+    else:
+        form = PasswordChangeForm(request.user)
+    return render(request, 'settings.html', {
+        'form': form,
+        'cart_count': _cart_count(request),
+    })

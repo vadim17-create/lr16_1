@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Личный кабинет — SALMO Shop{% endblock %}
+{% block content %}
+
+<div class="row g-4">
+    <!-- Profile Card -->
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body text-center">
+                <div style="width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,#0d6efd,#0ea5e9);
+                            display:flex;align-items:center;justify-content:center;font-size:2rem;color:#fff;margin:0 auto 1rem;">
+                    {% if profile.avatar %}
+                    <img src="{{ profile.avatar.url }}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">
+                    {% else %}
+                    <i class="bi bi-person-fill"></i>
+                    {% endif %}
+                </div>
+                <h5 class="fw-bold">{{ user.username }}</h5>
+                <span class="badge {% if profile.role == 'ADMIN' %}bg-danger{% elif profile.role == 'MANAGER' %}bg-warning text-dark{% else %}bg-primary{% endif %} mb-2">
+                    {{ profile.role_display }}
+                </span>
+                <p class="text-muted small">{{ user.email }}</p>
+                <div class="d-flex gap-2 justify-content-center">
+                    <a href="/settings/" class="btn btn-outline-primary btn-sm">
+                        <i class="bi bi-gear"></i> Настройки
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Edit Profile Form -->
+        <div class="card border-0 shadow-sm mt-3">
+            <div class="card-body">
+                <h6 class="fw-bold mb-3"><i class="bi bi-pencil-square"></i> Редактировать профиль</h6>
+                <form method="post" id="profile-form">
+                    {% csrf_token %}
+                    <div class="mb-2">
+                        <label class="form-label small fw-bold">Полное имя</label>
+                        <input class="form-control form-control-sm" type="text" name="full_name" value="{{ profile.full_name }}">
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label small fw-bold">Телефон</label>
+                        <input class="form-control form-control-sm" type="tel" name="phone" value="{{ profile.phone }}">
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label small fw-bold">Адрес</label>
+                        <input class="form-control form-control-sm" type="text" name="address" value="{{ profile.address }}">
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label small fw-bold">Город доставки</label>
+                        <input class="form-control form-control-sm" type="text" name="city" value="{{ profile.city }}">
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label small fw-bold">Почтовый индекс</label>
+                        <input class="form-control form-control-sm" type="text" name="postal_code" value="{{ profile.postal_code }}">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Любимая категория</label>
+                        <select class="form-select form-select-sm" name="favorite_category">
+                            <option value="">— не выбрано —</option>
+                            {% for cat in categories %}
+                            <option value="{{ cat.id }}" {% if profile.favorite_category_id == cat.id %}selected{% endif %}>{{ cat.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-sm w-100">Сохранить</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Orders -->
+    <div class="col-md-8">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <h5 class="fw-bold mb-3"><i class="bi bi-bag-check"></i> Мои заказы</h5>
+
+                {% if orders %}
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead>
+                            <tr>
+                                <th>№</th>
+                                <th>Дата</th>
+                                <th>Сумма</th>
+                                <th>Статус</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for order in orders %}
+                            <tr>
+                                <td class="fw-bold">#{{ order.id }}</td>
+                                <td class="small text-muted">{{ order.created_at|date:"d.m.Y H:i" }}</td>
+                                <td class="fw-bold text-success">{{ order.total_amount }} руб.</td>
+                                <td>
+                                    <span class="badge {% if order.status == 'delivered' %}bg-success{% elif order.status == 'cancelled' %}bg-danger{% elif order.status == 'shipped' %}bg-info{% else %}bg-secondary{% endif %}">
+                                        {{ order.get_status_display }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <a href="/profile/order/{{ order.pk }}/" class="btn btn-outline-primary btn-sm">
+                                        Подробнее
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-5 text-muted">
+                    <i class="bi bi-inbox" style="font-size:3rem;"></i>
+                    <p class="mt-2">У вас пока нет заказов.</p>
+                    <a href="/catalog/" class="btn btn-primary btn-sm">Перейти в каталог</a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
