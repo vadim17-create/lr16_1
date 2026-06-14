@@ -4,6 +4,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login
 from django.core.mail import EmailMessage
+from django.core.paginator import Paginator
 from django.conf import settings
 from decimal import Decimal
 import io
@@ -52,7 +53,13 @@ def _cart_count(request):
 
 
 def home(request):
-    return render(request, 'home.html', {'cart_count': _cart_count(request)})
+    popular_products = Product.objects.order_by('-id')[:6]
+    categories = Category.objects.all()
+    return render(request, 'home.html', {
+        'popular_products': popular_products,
+        'categories': categories,
+        'cart_count': _cart_count(request),
+    })
 
 
 def about(request):
@@ -78,6 +85,7 @@ def author(request):
 def product_list(request):
     products = Product.objects.all()
     categories = Category.objects.all()
+    manufacturers = Manufacturer.objects.all()
 
     search_query = request.GET.get('search', '').strip()
     if search_query:
@@ -87,17 +95,29 @@ def product_list(request):
     if category_id:
         products = products.filter(category_id=category_id)
 
+    manufacturer_id = request.GET.get('manufacturer', '')
+    if manufacturer_id:
+        products = products.filter(manufacturer_id=manufacturer_id)
+
     sort_by = request.GET.get('sort', '')
     if sort_by == 'cheap':
         products = products.order_by('price')
     elif sort_by == 'expensive':
         products = products.order_by('-price')
 
+    # Пагинация — 9 товаров на странице
+    paginator = Paginator(products, 9)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
     return render(request, 'catalog.html', {
-        'products': products,
+        'page_obj': page_obj,
+        'products': page_obj,
         'categories': categories,
+        'manufacturers': manufacturers,
         'search_query': search_query,
         'category_id': category_id,
+        'manufacturer_id': manufacturer_id,
         'sort_by': sort_by,
         'total': products.count(),
         'cart_count': _cart_count(request),

@@ -1,0 +1,243 @@
+/* ================================================
+   SALMO Shop — Custom Styles
+   ================================================ */
+
+:root {
+    --salmo-primary: #0a58ca;
+    --salmo-primary-light: #0d6efd;
+    --salmo-accent: #0ea5e9;
+    --salmo-dark: #0f172a;
+    --salmo-success: #198754;
+    --salmo-danger: #dc3545;
+    --salmo-warning: #ffc107;
+    --salmo-bg: #f0f4f8;
+    --salmo-card: #ffffff;
+    --salmo-text: #1e293b;
+    --salmo-muted: #64748b;
+    --salmo-border: #e2e8f0;
+    --salmo-radius: 12px;
+    --salmo-shadow: 0 2px 12px rgba(0,0,0,.06);
+    --salmo-shadow-hover: 0 8px 30px rgba(0,0,0,.12);
+}
+
+/* === GLOBAL === */
+body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: var(--salmo-bg);
+    color: var(--salmo-text);
+}
+
+/* === HERO SECTION === */
+.hero-section {
+    background: linear-gradient(135deg, #0a3d8f 0%, #0ea5e9 100%);
+    color: #fff;
+    padding: 5rem 2rem;
+    border-radius: var(--salmo-radius);
+    text-align: center;
+    margin-bottom: 2.5rem;
+    position: relative;
+    overflow: hidden;
+}
+.hero-section::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -20%;
+    width: 500px;
+    height: 500px;
+    background: rgba(255,255,255,.05);
+    border-radius: 50%;
+}
+.hero-section h1 {
+    font-size: 3rem;
+    font-weight: 800;
+    margin-bottom: 1rem;
+}
+.hero-section p {
+    font-size: 1.2rem;
+    opacity: .9;
+    max-width: 600px;
+    margin: 0 auto 2rem;
+}
+
+/* === PRODUCT CARDS === */
+.product-card {
+    background: var(--salmo-card);
+    border-radius: var(--salmo-radius);
+    box-shadow: var(--salmo-shadow);
+    overflow: hidden;
+    transition: box-shadow .25s, transform .25s;
+    border: 1px solid var(--salmo-border);
+}
+.product-card:hover {
+    box-shadow: var(--salmo-shadow-hover);
+    transform: translateY(-4px);
+}
+.product-card .card-img-top {
+    height: 200px;
+    object-fit: cover;
+    background: linear-gradient(135deg, #e0f2fe, #bae6fd);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 4rem;
+}
+.product-card .card-body {
+    padding: 1.2rem;
+}
+
+/* === SIDEBAR FILTER === */
+.filter-sidebar {
+    background: var(--salmo-card);
+    border-radius: var(--salmo-radius);
+    box-shadow: var(--salmo-shadow);
+    padding: 1.5rem;
+    position: sticky;
+    top: 80px;
+}
+.filter-sidebar h5 {
+    font-weight: 700;
+    margin-bottom: 1.2rem;
+    padding-bottom: .8rem;
+    border-bottom: 2px solid var(--salmo-primary-light);
+}
+
+/* === BREADCRUMBS === */
+.breadcrumb-custom {
+    background: var(--salmo-card);
+    border-radius: var(--salmo-radius);
+    padding: .8rem 1.2rem;
+    margin-bottom: 1.5rem;
+    box-shadow: var(--salmo-shadow);
+    font-size: .9rem;
+}
+
+/* === TOAST NOTIFICATIONS === */
+.toast-container {
+    position: fixed;
+    top: 80px;
+    right: 20px;
+    z-index: 9999;
+}
+
+/* === SPINNER === */
+.spinner-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255,255,255,.7);
+    z-index: 9998;
+    align-items: center;
+    justify-content: center;
+}
+.spinner-overlay.active {
+    display: flex;
+}
+
+/* === CATEGORY BADGES === */
+.category-badge {
+    display: inline-block;
+    padding: .3rem .8rem;
+    border-radius: 20px;
+    font-size: .8rem;
+    font-weight: 600;
+    background: #e0f2fe;
+    color: #0369a1;
+    text-decoration: none;
+    transition: background .2s;
+}
+.category-badge:hover {
+    background: #bae6fd;
+    color: #0369a1;
+}
+
+/* === PAGINATION === */
+.pagination .page-link {
+    border-radius: 8px;
+    margin: 0 3px;
+    border: 1px solid var(--salmo-border);
+    color: var(--salmo-primary);
+    font-weight: 600;
+}
+.pagination .page-item.active .page-link {
+    background: var(--salmo-primary-light);
+    border-color: var(--salmo-primary-light);
+}
+
+/* === FOOTER === */
+.site-footer {
+    background: var(--salmo-dark);
+    color: rgba(255,255,255,.6);
+    padding: 2rem 0;
+    margin-top: 3rem;
+}
+.site-footer a {
+    color: var(--salmo-accent);
+    text-decoration: none;
+}
+.site-footer a:hover {
+    color: #fff;
+}
+
+/* === NAVBAR === */
+.navbar-salmo {
+    background: linear-gradient(135deg, #0a3d8f 0%, #065fad 100%);
+    box-shadow: 0 2px 12px rgba(0,0,0,.15);
+}
+.navbar-salmo .navbar-brand {
+    font-weight: 800;
+    font-size: 1.4rem;
+    letter-spacing: .5px;
+}
+.navbar-salmo .nav-link {
+    color: rgba(255,255,255,.85) !important;
+    font-weight: 500;
+    transition: color .2s;
+}
+.navbar-salmo .nav-link:hover {
+    color: #fff !important;
+}
+
+/* === LEGACY COMPATIBILITY === */
+/* Classes used by existing templates */
+.page-title {
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+}
+.form-group {
+    margin-bottom: 1.2rem;
+}
+.form-group label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: .4rem;
+    font-size: .9rem;
+}
+.btn-outline {
+    background: transparent;
+    border: 2px solid var(--salmo-primary-light);
+    color: var(--salmo-primary-light);
+}
+.btn-outline:hover {
+    background: var(--salmo-primary-light);
+    color: #fff;
+}
+
+/* CSS Variables for templates using var(--muted), var(--primary) */
+:root {
+    --primary: #0d6efd;
+    --primary-dark: #0a58ca;
+    --success: #198754;
+    --danger: #dc3545;
+    --bg: #f4f6f9;
+    --card-bg: #ffffff;
+    --text: #212529;
+    --muted: #6c757d;
+    --border: #dee2e6;
+    --radius: 10px;
+    --shadow: 0 2px 12px rgba(0,0,0,.08);
+}
