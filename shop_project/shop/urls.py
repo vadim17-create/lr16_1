@@ -1,7 +1,20 @@
-from django.urls import path
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
 from . import views
 
+# API Router
+router = DefaultRouter()
+router.register(r'products', views.ProductViewSet)
+router.register(r'categories', views.CategoryViewSet)
+router.register(r'manufacturers', views.ManufacturerViewSet)
+router.register(r'carts', views.CartViewSet)
+router.register(r'cart-items', views.CartItemViewSet)
+
 urlpatterns = [
+    # API
+    path('api/', include(router.urls)),
+    path('api/auth/', include('rest_framework.urls', namespace='rest_framework')),
+
     #  старые маршруты
     path('', views.home, name='home'),
     path('about/', views.about, name='about'),

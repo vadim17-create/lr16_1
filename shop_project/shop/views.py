@@ -7,8 +7,15 @@ from django.core.mail import EmailMessage
 from django.conf import settings
 from decimal import Decimal
 import io
-from .models import Product, Category, Cart, CartItem, Order, OrderItem
+from .models import Product, Category, Cart, CartItem, Order, OrderItem, Manufacturer
 from .forms import RegisterForm
+
+# --- DRF imports ---
+from rest_framework import viewsets, permissions
+from .serializers import (
+    ProductSerializer, CategorySerializer, ManufacturerSerializer,
+    CartSerializer, CartItemSerializer,
+)
 
 # Проверка наличия openpyxl для Excel
 try:
@@ -361,3 +368,35 @@ def register(request):
     else:
         form = RegisterForm()
     return render(request, 'register.html', {'form': form})
+
+
+# ─── DRF API ViewSets ────────────────────────────────────────────────────────
+
+class ProductViewSet(viewsets.ModelViewSet):
+    queryset = Product.objects.all()
+    serializer_class = ProductSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+
+class CategoryViewSet(viewsets.ModelViewSet):
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+
+class ManufacturerViewSet(viewsets.ModelViewSet):
+    queryset = Manufacturer.objects.all()
+    serializer_class = ManufacturerSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+
+class CartViewSet(viewsets.ModelViewSet):
+    queryset = Cart.objects.all()
+    serializer_class = CartSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+
+class CartItemViewSet(viewsets.ModelViewSet):
+    queryset = CartItem.objects.all()
+    serializer_class = CartItemSerializer
+    permission_classes = [permissions.IsAuthenticated]
